@@ -67,6 +67,7 @@ module.exports = function(grunt) {
         promiseArr.push(uploadPromise);
       });
 
+      grunt.log.writeln('Uploading...');
       Q.all(promiseArr)
       .then(function (rets) {
         rets.forEach(function (ret) {
