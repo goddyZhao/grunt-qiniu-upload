@@ -49,6 +49,10 @@ module.exports = function(grunt) {
         }
       });
 
+      var cwd = null;
+      if (f.orig && f.orig.expand && f.orig.cwd) {
+        cwd = f.orig.cwd;
+      }
 
       var promiseArr = [];
       src.forEach(function (filepath) {
@@ -56,14 +60,17 @@ module.exports = function(grunt) {
         if (!grunt.file.isPathAbsolute(filepath)) {
           absoluteFilePath = path.resolve(filepath);
         }
+        
+        var key = cwd ? path.relative(cwd, filepath) : filepath;
 
         grunt.log.debug('Generate uptoken');
-        var putPolicy = new qiniu.rs.PutPolicy(f.dest + ':' + filepath);
+        var putPolicy = new qiniu.rs.PutPolicy(f.dest + ':' + key);
         var token = putPolicy.token();
         grunt.log.debug('Generated upoken');
 
-        grunt.log.writeln('Start uploading ' + filepath);
-        var uploadPromise = Q.ninvoke(qiniu.io, 'putFile', token, filepath, absoluteFilePath, null);
+
+        grunt.log.writeln('Start uploading ' + key);
+        var uploadPromise = Q.ninvoke(qiniu.io, 'putFile', token, key, absoluteFilePath, null);
         promiseArr.push(uploadPromise);
       });
 
