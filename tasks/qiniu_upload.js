@@ -31,6 +31,8 @@ module.exports = function(grunt) {
     qiniu.conf.SECRET_KEY = options.secretKey;
 
     // Iterate over all specified file groups.
+    var promiseArr = [];
+
     this.files.forEach(function(f) {
       if (!f.dest) {
         grunt.fail.fatal('dest is required');
@@ -54,7 +56,6 @@ module.exports = function(grunt) {
         cwd = f.orig.cwd;
       }
 
-      var promiseArr = [];
       src.forEach(function (filepath) {
         var absoluteFilePath = filepath;
         if (!grunt.file.isPathAbsolute(filepath)) {
@@ -74,20 +75,24 @@ module.exports = function(grunt) {
         promiseArr.push(uploadPromise);
       });
 
-      grunt.log.writeln('Uploading...');
-      Q.all(promiseArr)
-      .then(function (rets) {
-        rets.forEach(function (ret) {
-          grunt.log.writeln('Uploaded ' + ret[0].key);
-        });
-        done();
-      })
-      .then(null, function (err) {
-        grunt.log.error(err.code);
-        grunt.log.error(err.error);
-        done(false);
+    });
+  
+    if (promiseArr.length === 0) {
+      return done();
+    };
+
+    grunt.log.writeln('Uploading...');
+    Q.all(promiseArr)
+    .then(function (rets) {
+      rets.forEach(function (ret) {
+        grunt.log.writeln('Uploaded ' + ret[0].key);
       });
+      done();
+    })
+    .then(null, function (err) {
+      grunt.log.error(err.code);
+      grunt.log.error(err.error);
+      done(false);
     });
   });
-
 };
