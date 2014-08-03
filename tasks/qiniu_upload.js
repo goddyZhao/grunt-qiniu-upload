@@ -63,9 +63,10 @@ module.exports = function(grunt) {
         }
         
         var key = cwd ? path.relative(cwd, filepath) : filepath;
+        var bucket = f.orig.dest;
 
         grunt.log.debug('Generate uptoken');
-        var putPolicy = new qiniu.rs.PutPolicy(f.dest + ':' + key);
+        var putPolicy = new qiniu.rs.PutPolicy(bucket + ':' + key);
         var token = putPolicy.token();
         grunt.log.debug('Generated upoken');
 
